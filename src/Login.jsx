@@ -1,6 +1,9 @@
 // Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Signup from './componenets/Signup'
+import { Link } from 'react-router-dom';
+import './styling-sheet/Signin-up.css'
 
 const Login = ({ setRole }) => {
   const [email, setEmail] = useState('');
@@ -34,10 +37,36 @@ const Login = ({ setRole }) => {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
+    <div className='login-container'>     
+      <form onSubmit={handleLogin} className='login'>
+      <h1 className='h1-sign'>Login</h1>
+      <label>Email <br/>
+            <input className='input-sign'
+             type="email" 
+             name="email" 
+             placeholder='john@example.com'
+             value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            />
+        </label> <br/>
+        <label>Password <br/>
+            <input className='input-sign' 
+            type="password" name="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder='password'/>
+        </label> <br/> <br/>
+        <button className='btn-log' type="submit">
+            Sign in
+        </button>
+        {/* <div className='tosignup'>
+            <p className='text-login'>Don&apos;t have an account ?</p> 
+            <p><Link to="/Signup"> Sign up </Link></p>
+        </div> */}
+      </form>
+        {/* <div>
           <label>Email:</label>
           <input
             type="email"
@@ -56,7 +85,7 @@ const Login = ({ setRole }) => {
           />
         </div>
         <button type="submit">Login</button>
-      </form>
+      </form> */}
     </div>
   );
 };
