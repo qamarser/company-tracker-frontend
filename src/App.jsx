@@ -1,13 +1,24 @@
-import { useState } from 'react'
-import './App.css'
+// App.jsx
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './Login.jsx';
+import MainPage from './MainPage.jsx';
+import AdminPage from './AdminPage.jsx';
+import CreateAdmin from './CreateAdmin.jsx';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [role, setRole] = useState(null);
 
   return (
-    <>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login setRole={setRole} />} />
+        <Route path="/main" element={<MainPage role={role} />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/create-admin" element={<CreateAdmin />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
