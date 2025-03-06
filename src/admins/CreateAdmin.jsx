@@ -19,7 +19,7 @@ const CreateAdmin = () => {
 
     // Send form data as JSON
     try {
-        const response = await fetch('http://localhost:5001/admins', {
+        const response = await fetch('https://finance-x1t2.onrender.com/admins', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),

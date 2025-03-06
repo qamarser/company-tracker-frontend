@@ -20,7 +20,7 @@ const IncomesPage = ({ role }) => {
       setLoggedInAdminId(user.admin_id);
     }
   
-    fetch('http://localhost:5001/incomes', {
+    fetch('https://finance-x1t2.onrender.com/incomes', {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
@@ -45,7 +45,7 @@ const IncomesPage = ({ role }) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:5001/incomes', {
+      const response = await fetch('https://finance-x1t2.onrender.com/incomes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ const IncomesPage = ({ role }) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5001/incomes/${editingIncomeId}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/incomes/${editingIncomeId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ const IncomesPage = ({ role }) => {
   const handleDeleteIncome = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5001/incomes/${id}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/incomes/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

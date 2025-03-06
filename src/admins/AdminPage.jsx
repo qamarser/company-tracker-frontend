@@ -6,7 +6,7 @@ const AdminPage = () => {
 
   useEffect(() => {
     // Fetch all admins
-    fetch('http://localhost:5001/admins')
+    fetch('https://finance-x1t2.onrender.com/admins')
       .then((res) => res.json())
       .then((data) => setAdmins(data))
       .catch((err) => console.error('Error fetching admins:', err));
@@ -14,7 +14,7 @@ const AdminPage = () => {
 
   const handleDelete = async (adminId) => {
     try {
-      const response = await fetch(`http://localhost:5001/admins/${adminId}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/admins/${adminId}`, {
         method: 'DELETE',
       });
       const data = await response.json();

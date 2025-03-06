@@ -12,7 +12,7 @@ const ExpensesPage = ({ role }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:5001/api/expenses', {
+    fetch('https://finance-x1t2.onrender.com/api/expenses', {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -56,7 +56,7 @@ const ExpensesPage = ({ role }) => {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch('http://localhost:5001/api/expenses', {
+      const response = await fetch('https://finance-x1t2.onrender.com/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ title, description, amount, currency }),
@@ -83,7 +83,7 @@ const ExpensesPage = ({ role }) => {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`http://localhost:5001/api/expenses/${id}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/api/expenses/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       });
@@ -107,7 +107,7 @@ const ExpensesPage = ({ role }) => {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`http://localhost:5001/api/expenses/${editingExpenseId}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/api/expenses/${editingExpenseId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ title, description, amount, currency }),
