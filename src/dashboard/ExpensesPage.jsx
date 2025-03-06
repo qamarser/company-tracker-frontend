@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../styling-sheet/FinanceTable.css';
 
 const ExpensesPage = ({ role }) => {
   const [expenses, setExpenses] = useState([]);
@@ -7,6 +8,7 @@ const ExpensesPage = ({ role }) => {
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('');
   const [editingExpenseId, setEditingExpenseId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -27,7 +29,26 @@ const ExpensesPage = ({ role }) => {
     setDescription(expense.description || '');
     setAmount(expense.amount);
     setCurrency(expense.currency);
+    setShowForm(true); 
   };
+
+  const handleAddClick = () => {
+    setEditingExpenseId(null);
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCurrency('');
+    setShowForm(true); 
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingExpenseId(null);
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCurrency('');
+  }
 
   // ✅ Add Expense
   const handleAddExpense = async (e) => {
@@ -111,9 +132,9 @@ const ExpensesPage = ({ role }) => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h2>Expenses</h2>
-      <table border="1" cellPadding="4">
+      <table border="1" cellPadding="4" className="finance-table">
         <thead>
           <tr>
             <th>Title</th>
@@ -133,8 +154,8 @@ const ExpensesPage = ({ role }) => {
               <td>
                 {canEditDelete && (
                   <>
-                    <button onClick={() => handleEditClick(exp)}>Edit</button>
-                    <button onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
+                    <button className="ebtn" onClick={() => handleEditClick(exp)}>Edit</button>
+                    <button className="ebtn" onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
                   </>
                 )}
               </td>
@@ -143,17 +164,19 @@ const ExpensesPage = ({ role }) => {
         </tbody>
       </table>
 
-      <h3>{editingExpenseId ? 'Edit Expense' : 'Add Expense'}</h3>
-      <form onSubmit={editingExpenseId ? handleUpdateExpense : handleAddExpense}>
-        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
-        <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
-        
-        <button type="submit">
-          {editingExpenseId ? 'Update' : 'Add'}
-        </button>
-      </form>
+      {showForm && (
+        <form onSubmit={editingExpenseId ? handleUpdateExpense : handleAddExpense} className="form-container">
+          <h3>{editingExpenseId ? 'Edit Expense' : 'Add Expense'}</h3> 
+          <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required /> 
+          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} /> 
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required /> 
+          <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required /> 
+          <button type="submit" className="sbtn">
+            {editingExpenseId ? 'Update' : 'Add'}
+          </button>
+          <button type="button" className="sbtn" onClick={handleFormClose}>Cancel</button>
+        </form>
+      )}
     </div>
   );
 };

@@ -1,10 +1,10 @@
 // App.jsx
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './Login.jsx';
+import Login from './componenets/Login.jsx';
 import MainPage from './MainPage.jsx';
-import AdminPage from './AdminPage.jsx';
-import CreateAdmin from './CreateAdmin.jsx';
+import AdminPage from './admins/AdminPage.jsx';
+import CreateAdmin from './admins/CreateAdmin.jsx';
 
 function App() {
   const [role, setRole] = useState(null);

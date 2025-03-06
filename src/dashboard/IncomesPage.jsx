@@ -11,6 +11,7 @@ const IncomesPage = ({ role }) => {
   const [currency, setCurrency] = useState('');
   const [editingIncomeId, setEditingIncomeId] = useState(null);
   const [loggedInAdminId, setLoggedInAdminId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -83,8 +84,19 @@ const IncomesPage = ({ role }) => {
     setDescription(income.description || '');
     setAmount(income.amount);
     setCurrency(income.currency);
+    setShowForm(true); 
   };
 
+    // -------------- Cancel --------------
+    const handleFormClose = () => {
+      setShowForm(false);
+      setEditingIncomeId(null);
+      setTitle('');
+      setDescription('');
+      setAmount('');
+      setCurrency('');
+    };
+    
   // -------------- UPDATE --------------
   const handleUpdateIncome = async (e) => {
     e.preventDefault();
@@ -144,8 +156,9 @@ const IncomesPage = ({ role }) => {
     }
   };
 
+
   return (
-    <div>
+    <div className="container">
       <h2>Incomes</h2>
       <table border="1" cellPadding="4">
         <thead>
@@ -163,6 +176,15 @@ const IncomesPage = ({ role }) => {
             // admin might have partial, enforced by backend
             const canEditDelete = role === 'admin' || role === 'subadmin';
 
+            const handleFormClose = () => {
+              setShowForm(false);
+              setEditingIncomeId(null);
+              setTitle('');
+              setDescription('');
+              setAmount('');
+              setCurrency('');
+            };
+            
 
             return (
               <tr key={income.id}>
@@ -173,8 +195,8 @@ const IncomesPage = ({ role }) => {
                 <td>
                   {canEditDelete && (
                     <>
-                      <button onClick={() => handleEditClick(income)}>Edit</button>
-                      <button onClick={() => handleDeleteIncome(income.id)}>Delete</button>
+                      <button className="ebtn" onClick={() => handleEditClick(income)}>Edit</button>
+                      <button className="ebtn" onClick={() => handleDeleteIncome(income.id)}>Delete</button>
                     </>
                   )}
                 </td>
@@ -186,47 +208,46 @@ const IncomesPage = ({ role }) => {
 
       {canAdd && (
         <div style={{ marginTop: '2rem' }}>
-          <h3>{editingIncomeId ? 'Edit Income' : 'Add Income'}</h3>
-          <form onSubmit={editingIncomeId ? handleUpdateIncome : handleAddIncome}>
-            <div>
-              <label>Title:</label>
+          {showForm && (
+          <form className="form-container" onSubmit={editingIncomeId ? handleUpdateIncome : handleAddIncome}>
+             <h3>{editingIncomeId ? 'Edit Income' : 'Add Income'}</h3>
+
+
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
               />
-            </div>
-            <div>
-              <label>Description:</label>
+
+          
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-            </div>
-            <div>
-              <label>Amount:</label>
+
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
               />
-            </div>
-            <div>
-              <label>Currency:</label>
+           
               <input
                 type="text"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 required
               />
-            </div>
-            <button type="submit">
+              
+            <button type="submit" className="sbtn" >
               {editingIncomeId ? 'Update' : 'Add'}
             </button>
+            <button type="button" className="sbtn" onClick={handleFormClose}>
+                    Cancel </button>
           </form>
+         )}
         </div>
       )}
     </div>
