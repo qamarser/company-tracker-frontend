@@ -1,9 +1,9 @@
 // Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Signup from './componenets/Signup'
+import Signup from './Signup'
 import { Link } from 'react-router-dom';
-import './styling-sheet/Signin-up.css'
+import '../styling-sheet/Signin-up.css'
 
 const Login = ({ setRole }) => {
   const [email, setEmail] = useState('');
@@ -66,26 +66,6 @@ const Login = ({ setRole }) => {
             <p><Link to="/Signup"> Sign up </Link></p>
         </div> */}
       </form>
-        {/* <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form> */}
     </div>
   );
 };

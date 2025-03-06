@@ -1,10 +1,10 @@
 // MainPage.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import IncomesPage from './IncomesPage.jsx';
-import ExpensesPage from './ExpensesPage.jsx';
-import RecurringExpensesPage from './RecurringExpensesPage.jsx';
-import RecurringIncomesPage from './RecurringIncomesPage.jsx';
+import IncomesPage from './dashboard/IncomesPage.jsx';
+import ExpensesPage from './dashboard/ExpensesPage.jsx';
+import RecurringExpensesPage from './dashboard/RecurringExpensesPage.jsx';
+import RecurringIncomesPage from './dashboard/RecurringIncomesPage.jsx';
 import ProfitGoalPage from './ProfitGoalPage.jsx';
 
 const MainPage = ({ role }) => {

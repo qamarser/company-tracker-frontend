@@ -9,6 +9,7 @@ const RecurringIncomesPage = ({ role }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [editingIncomeId, setEditingIncomeId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -63,6 +64,7 @@ const RecurringIncomesPage = ({ role }) => {
 
   const handleEditClick = (income) => {
     setEditingIncomeId(income.id);
+    setShowForm(true); // Ensure the form is shown when editing
     setTitle(income.title);
     setDescription(income.description || '');
     setAmount(income.amount);
@@ -70,6 +72,7 @@ const RecurringIncomesPage = ({ role }) => {
     setStartDate(income.start_date);
     setEndDate(income.end_date);
   };
+
 
   const handleDeleteIncome = async (id) => {
     const token = localStorage.getItem('token');
@@ -89,11 +92,22 @@ const RecurringIncomesPage = ({ role }) => {
     }
   };
 
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingIncomeId(null);
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCurrency('');
+  };
+
   const canEditDelete = role === 'admin' || role === 'subadmin';
 
   return (
-    <div>
+    <div className="container">
       <h2>Recurring Incomes</h2>
+      <button className="sbtn" onClick={() => setShowForm(true)}>Add Recurring Income</button>
+
       <table border="1" cellPadding="4">
         <thead>
           <tr>
@@ -118,8 +132,8 @@ const RecurringIncomesPage = ({ role }) => {
               <td>
                 {canEditDelete && (
                   <>
-                    <button onClick={() => handleEditClick(inc)}>Edit</button>
-                    <button onClick={() => handleDeleteIncome(inc.id)}>Delete</button>
+                    <button className="ebtn" onClick={() => handleEditClick(inc)}>Edit</button>
+                    <button className="ebtn" onClick={() => handleDeleteIncome(inc.id)}>Delete</button>
                   </>
                 )}
               </td>
@@ -127,18 +141,22 @@ const RecurringIncomesPage = ({ role }) => {
           ))}
         </tbody>
       </table>
-
-      <h3>{editingIncomeId ? 'Edit Recurring Income' : 'Add Recurring Income'}</h3>
-      <form onSubmit={handleAddOrUpdateIncome}>
-        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
-        <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
-        <input type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-        <input type="date" placeholder="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+      {showForm && (
+      <form className="form-container" onSubmit={handleAddOrUpdateIncome}>
         
-        <button type="submit">{editingIncomeId ? 'Update' : 'Add'}</button>
+       <h3>{editingIncomeId ? 'Edit Recurring Income' : 'Add Recurring Income'}</h3>
+      <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required /> 
+       <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} /> 
+       <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required /> 
+       <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required /> 
+       <input type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required /> 
+       <input type="date" placeholder="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required /> 
+        
+        <button className="sbtn" type="submit">{editingIncomeId ? 'Update' : 'Add'}</button>
+        <button type="button" className="sbtn" onClick={handleFormClose}>
+        Cancel </button>
       </form>
+       )}
     </div>
   );
 };

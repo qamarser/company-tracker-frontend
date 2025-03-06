@@ -9,6 +9,7 @@ const RecurringExpensesPage = ({ role }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [editingExpenseId, setEditingExpenseId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -63,6 +64,7 @@ const RecurringExpensesPage = ({ role }) => {
 
   const handleEditClick = (expense) => {
     setEditingExpenseId(expense.id);
+    setShowForm(true); // Ensure the form is shown when editing
     setTitle(expense.title);
     setDescription(expense.description || '');
     setAmount(expense.amount);
@@ -70,6 +72,7 @@ const RecurringExpensesPage = ({ role }) => {
     setStartDate(expense.start_date);
     setEndDate(expense.end_date);
   };
+
 
   const handleDeleteExpense = async (id) => {
     const token = localStorage.getItem('token');
@@ -88,13 +91,23 @@ const RecurringExpensesPage = ({ role }) => {
       console.error('Error:', err);
     }
   };
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingExpenseId(null);
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCurrency('');
+  };
 
   const canEditDelete = role === 'admin' || role === 'subadmin';
 
   return (
-    <div>
+    <div className="container">
       <h2>Recurring Expenses</h2>
+      <button className="sbtn" onClick={() => setShowForm(true)}>Add Recurring Expense</button>
       <table border="1" cellPadding="4">
+
         <thead>
           <tr>
             <th>Title</th>
@@ -118,8 +131,8 @@ const RecurringExpensesPage = ({ role }) => {
               <td>
                 {canEditDelete && (
                   <>
-                    <button onClick={() => handleEditClick(exp)}>Edit</button>
-                    <button onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
+                    <button className="ebtn" onClick={() => handleEditClick(exp)}>Edit</button>
+                    <button className="ebtn" onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
                   </>
                 )}
               </td>
@@ -127,9 +140,9 @@ const RecurringExpensesPage = ({ role }) => {
           ))}
         </tbody>
       </table>
-
-      <h3>{editingExpenseId ? 'Edit Recurring Expense' : 'Add Recurring Expense'}</h3>
-      <form onSubmit={handleAddOrUpdateExpense}>
+      {showForm && (
+      <form className="form-container" onSubmit={handleAddOrUpdateExpense}>
+        <h3>{editingExpenseId ? 'Edit Recurring Expense' : 'Add Recurring Expense'}</h3>
         <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
         <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
         <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
@@ -137,8 +150,11 @@ const RecurringExpensesPage = ({ role }) => {
         <input type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
         <input type="date" placeholder="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
         
-        <button type="submit">{editingExpenseId ? 'Update' : 'Add'}</button>
+        <button className="sbtn" type="submit">{editingExpenseId ? 'Update' : 'Add'}</button>
+        <button type="button" className="sbtn" onClick={handleFormClose}>
+        Cancel </button>
       </form>
+    )}
     </div>
   );
 };

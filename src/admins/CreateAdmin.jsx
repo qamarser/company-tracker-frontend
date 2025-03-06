@@ -46,46 +46,43 @@ const CreateAdmin = () => {
     };
 
   return (
-    <div>
-      <h2>Create Admin</h2>
-      <form id="adminForm" onSubmit={handleSubmit} autoComplete="off">
-        <label htmlFor="name">Name:</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <br />
-        <br />
+    <div className='login-container'>
+      <form  className='login' id="adminForm" onSubmit={handleSubmit} autoComplete="off">
+      <h1 className='h1-sign'>Registration</h1>
+      <label>Name: <br/> 
+            <input className='input-sign' 
+            type='text' 
+            placeholder='Username'
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required 
+            />
+        </label> <br/> 
 
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="off"
-        />
-        <br />
-        <br />
+        <label>Email: <br/>
+            <input className='input-sign' 
+            type="email" 
+            name="email" 
+            placeholder='john@example.com'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="off"
+            />
+        </label> <br/>
 
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="off"
-        />
-        <br />
-        <br />
+        <label>Password: <br/>
+            <input className='input-sign' 
+            type="password" 
+            name="password" 
+            placeholder='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="off"
+            />
+        </label> <br/> <br/>
 
         <label htmlFor="role">Role:</label>
         <select
@@ -98,10 +95,12 @@ const CreateAdmin = () => {
           <option value="admin">Admin</option>
           <option value="subadmin">Subadmin</option>
         </select>
-        <br />
-        <br />
+        <br/>
+        <br/>
 
-        <button type="submit">Submit</button>
+        <button className='btn-log' type="submit">
+            Sign in
+        </button>
       </form>
     </div>
   );
