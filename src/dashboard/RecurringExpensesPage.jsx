@@ -13,7 +13,7 @@ const RecurringExpensesPage = ({ role }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:5001/api/recurring_expenses', {
+    fetch('https://finance-x1t2.onrender.com/api/recurring_expenses', {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -25,8 +25,8 @@ const RecurringExpensesPage = ({ role }) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     const url = editingExpenseId
-      ? `http://localhost:5001/api/recurring_expenses/${editingExpenseId}`
-      : 'http://localhost:5001/api/recurring_expenses';
+      ? `https://finance-x1t2.onrender.com/api/recurring_expenses/${editingExpenseId}`
+      : 'https://finance-x1t2.onrender.com/api/recurring_expenses';
 
     const method = editingExpenseId ? 'PUT' : 'POST';
 
@@ -77,7 +77,7 @@ const RecurringExpensesPage = ({ role }) => {
   const handleDeleteExpense = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5001/api/recurring_expenses/${id}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/api/recurring_expenses/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });

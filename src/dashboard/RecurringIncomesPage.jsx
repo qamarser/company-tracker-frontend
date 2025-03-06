@@ -13,7 +13,7 @@ const RecurringIncomesPage = ({ role }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:5001/api/recurring_incomes', {
+    fetch('https://finance-x1t2.onrender.com/api/recurring_incomes', {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -25,8 +25,8 @@ const RecurringIncomesPage = ({ role }) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     const url = editingIncomeId
-      ? `http://localhost:5001/api/recurring_incomes/${editingIncomeId}`
-      : 'http://localhost:5001/api/recurring_incomes';
+      ? `https://finance-x1t2.onrender.com/api/recurring_incomes/${editingIncomeId}`
+      : 'https://finance-x1t2.onrender.com/api/recurring_incomes';
 
     const method = editingIncomeId ? 'PUT' : 'POST';
 
@@ -77,7 +77,7 @@ const RecurringIncomesPage = ({ role }) => {
   const handleDeleteIncome = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5001/api/recurring_incomes/${id}`, {
+      const response = await fetch(`https://finance-x1t2.onrender.com/api/recurring_incomes/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
