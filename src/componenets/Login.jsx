@@ -1,20 +1,26 @@
-// Login.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styling-sheet/Signin-up.css'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styling-sheet/Signin-up.css";
 
 const Login = ({ setRole }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/main"); // ✅ Redirect logged-in users to main
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://localhost:5001/admins/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5001/admins/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
@@ -24,47 +30,45 @@ const Login = ({ setRole }) => {
         return;
       }
   
-      // Save token & role to localStorage
-      localStorage.setItem('token', data.token); 
-      localStorage.setItem('role', data.user.role); 
+      localStorage.setItem("token", data.token); 
+      localStorage.setItem("role", data.user.role); 
       setRole(data.user.role);
-      navigate('/main');
+      navigate("/main"); // ✅ Redirect after login
     } catch (err) {
-      console.error('Error logging in:', err);
-      alert('Error logging in. See console for details.');
+      console.error("Error logging in:", err);
+      alert("Error logging in. See console for details.");
     }
   };
-  
 
   return (
-    <div className='login-container'>     
-      <form onSubmit={handleLogin} className='login'>
-      <h1 className='h1-sign'>Login</h1>
-      <label>Email <br/>
-            <input className='input-sign'
-             type="email" 
-             name="email" 
-             placeholder='john@example.com'
-             value={email}
+    <div className="login-container">     
+      <form onSubmit={handleLogin} className="login">
+        <h1 className="h1-sign">Login</h1>
+        <label>Email <br/>
+          <input className="input-sign"
+            type="email" 
+            name="email" 
+            placeholder="john@example.com"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            />
-        </label> <br/>
+          />
+        </label> 
+        <br/>
         <label>Password <br/>
-            <input className='input-sign' 
-            type="password" name="password" 
+          <input className="input-sign" 
+            type="password" 
+            name="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder='password'/>
-        </label> <br/> <br/>
-        <button className='btn-log' type="submit">
-            Sign in
+            placeholder="password"
+          />
+        </label> 
+        <br/> <br/>
+        <button className="btn-log" type="submit">
+          Sign in
         </button>
-        {/* <div className='tosignup'>
-            <p className='text-login'>Don&apos;t have an account ?</p> 
-            <p><Link to="/Signup"> Sign up </Link></p>
-        </div> */}
       </form>
     </div>
   );
