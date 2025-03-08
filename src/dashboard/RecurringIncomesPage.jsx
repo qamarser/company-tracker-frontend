@@ -1,114 +1,118 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import Modal from "../componenets/Modal";
+import "../styling-sheet/FinanceTable.css";
 
 const RecurringIncomesPage = ({ role }) => {
   const [incomes, setIncomes] = useState([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [editingIncomeId, setEditingIncomeId] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('https://finance-x1t2.onrender.com/api/recurring_incomes', {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setIncomes(data))
-      .catch(err => console.error('Error fetching recurring incomes:', err));
+    fetchRecurringIncomes();
   }, []);
+
+  const fetchRecurringIncomes = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:5001/recurring_incomes", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (response.ok) setIncomes(data);
+    } catch (err) {
+      console.error("Error fetching recurring incomes:", err);
+    }
+  };
+
+  const openForm = () => setShowModal(true);
+  const closeForm = () => {
+    setShowModal(false);
+    setEditingIncomeId(null);
+    setTitle("");
+    setDescription("");
+    setAmount("");
+    setCurrency("");
+    setStartDate("");
+    setEndDate("");
+  };
 
   const handleAddOrUpdateIncome = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const url = editingIncomeId
-      ? `https://finance-x1t2.onrender.com/api/recurring_incomes/${editingIncomeId}`
-      : 'https://finance-x1t2.onrender.com/api/recurring_incomes';
 
-    const method = editingIncomeId ? 'PUT' : 'POST';
+    if (new Date(endDate) < new Date(startDate)) {
+      alert("End date cannot be earlier than the start date!");
+      return;
+    }
+    
+    const token = localStorage.getItem("token");
+    const url = editingIncomeId ? `http://localhost:5001/recurring_incomes/${editingIncomeId}` : "http://localhost:5001/recurring_incomes";
+    const method = editingIncomeId ? "PUT" : "POST";
 
     try {
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ title, description, amount, currency, start_date: startDate, end_date: endDate }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title, description, amount, currency:"$", start_date: startDate, end_date: endDate }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
       if (response.ok) {
         setIncomes(prev =>
-          editingIncomeId
-            ? prev.map(inc => (inc.id === editingIncomeId ? data.income : inc))
-            : [...prev, data.income]
+          editingIncomeId ? prev.map(inc => (inc.id === editingIncomeId ? result.income : inc)) : [...prev, result.income]
         );
-
-        // Reset form
-        setTitle('');
-        setDescription('');
-        setAmount('');
-        setCurrency('');
-        setStartDate('');
-        setEndDate('');
-        setEditingIncomeId(null);
+        closeForm();
       } else {
-        alert(`Error: ${data.error}`);
+        alert(`Error: ${result.error}`);
       }
     } catch (err) {
-      console.error('Error adding/updating recurring income:', err);
-      alert('Error adding/updating income. Check console for details.');
+      alert("Error adding/updating income.");
     }
   };
 
   const handleEditClick = (income) => {
     setEditingIncomeId(income.id);
-    setShowForm(true); // Ensure the form is shown when editing
     setTitle(income.title);
-    setDescription(income.description || '');
+    setDescription(income.description || "");
     setAmount(income.amount);
     setCurrency(income.currency);
     setStartDate(income.start_date);
     setEndDate(income.end_date);
+    setShowModal(true);
   };
 
-
   const handleDeleteIncome = async (id) => {
-    const token = localStorage.getItem('token');
+    if (!id) return;
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/api/recurring_incomes/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`http://localhost:5001/recurring_incomes/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
-        setIncomes(incomes.filter(inc => inc.id !== id));
+        setIncomes(prev => prev.filter(inc => inc.id !== id));
       } else {
-        alert('Error deleting income');
+        alert("Failed to delete income.");
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error deleting income:", err);
     }
   };
 
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingIncomeId(null);
-    setTitle('');
-    setDescription('');
-    setAmount('');
-    setCurrency('');
-  };
-
-  const canEditDelete = role === 'admin' || role === 'subadmin';
-
   return (
-    <div className="container">
-      <h2>Recurring Incomes</h2>
-      <button className="sbtn" onClick={() => setShowForm(true)}>Add Recurring Income</button>
+    <div className="table-container">
+      <div className="container-title">
+        <h2>Recurring Incomes</h2>
+        <button className="add-btn" onClick={openForm}>ADD</button>
+      </div>
 
-      <table border="1" cellPadding="4">
+      <table>
         <thead>
           <tr>
             <th>Title</th>
@@ -121,42 +125,37 @@ const RecurringIncomesPage = ({ role }) => {
           </tr>
         </thead>
         <tbody>
-          {incomes.map(inc => (
-            <tr key={inc.id}>
-              <td>{inc.title}</td>
-              <td>{inc.description}</td>
-              <td>{inc.amount}</td>
-              <td>{inc.currency}</td>
-              <td>{inc.start_date}</td>
-              <td>{inc.end_date}</td>
-              <td>
-                {canEditDelete && (
-                  <>
-                    <button className="ebtn" onClick={() => handleEditClick(inc)}>Edit</button>
-                    <button className="ebtn" onClick={() => handleDeleteIncome(inc.id)}>Delete</button>
-                  </>
-                )}
+          {incomes.map(income => (
+            <tr key={income.id}>
+              <td>{income.title}</td>
+              <td>{income.description}</td>
+              <td>{income.amount}</td>
+              <td>$</td>
+              <td>{income.start_date}</td>
+              <td>{income.end_date}</td>
+              <td className="btn-Edit-Delete">
+                <button className="ebtn" onClick={() => handleEditClick(income)}>✏️ Edit</button>
+                <button className="dbtn" onClick={() => handleDeleteIncome(income.id)}>🗑 Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {showForm && (
-      <form className="form-container" onSubmit={handleAddOrUpdateIncome}>
-        
-       <h3>{editingIncomeId ? 'Edit Recurring Income' : 'Add Recurring Income'}</h3>
-      <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required /> 
-       <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} /> 
-       <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required /> 
-       <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required /> 
-       <input type="date" placeholder="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required /> 
-       <input type="date" placeholder="End Date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required /> 
-        
-        <button className="sbtn" type="submit">{editingIncomeId ? 'Update' : 'Add'}</button>
-        <button type="button" className="sbtn" onClick={handleFormClose}>
-        Cancel </button>
-      </form>
-       )}
+
+      {/* 🔹 Modal Popup for Adding/Editing Recurring Income */}
+      <Modal isOpen={showModal} onClose={closeForm}>
+        <h3>{editingIncomeId ? "Edit Recurring Income" : "Add Recurring Income"}</h3>
+        <form onSubmit={handleAddOrUpdateIncome}>
+          <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input type="text" placeholder="Currency" value="$" onChange={(e) => setCurrency(e.target.value)} required />
+          <input type="date" value={startDate} min={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+          <button type="submit" className="sbtn">{editingIncomeId ? "Update" : "Add"}</button>
+          <button type="button" className="sbtn cancel-btn" onClick={closeForm}>Cancel</button>
+        </form>
+      </Modal>
     </div>
   );
 };

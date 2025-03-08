@@ -20,13 +20,24 @@
     box-shadow: none;
 }
 
-.btn-log{
-    width: 460px;
-    border-color: #82C2DD;
+.btn-log {
+    display: flex;
+    width: 150px;
+    height: 45px;
+    border: none;
+    border-radius: 8px;
     background-color: #1D5B8A;
     color: white;
-    font-size: 24px;
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;  /* 🔹 This centers the button */
+    cursor: pointer;
+    
+}
 
+.btn-log:hover {
+    background-color: #0B304D;
 }
 
 .tosignup{

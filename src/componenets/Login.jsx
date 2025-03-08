@@ -1,8 +1,6 @@
 // Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Signup from './Signup'
-import { Link } from 'react-router-dom';
 import '../styling-sheet/Signin-up.css'
 
 const Login = ({ setRole }) => {
@@ -12,22 +10,23 @@ const Login = ({ setRole }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
-      const response = await fetch('https://finance-x1t2.onrender.com/admins/login', {
+      const response = await fetch('http://localhost:5001/admins/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-
+      
       if (!response.ok) {
         alert(`Login failed: ${data.error}`);
         return;
       }
-
-      // data.token = JWT, data.user = { role, ... }
-      localStorage.setItem('token', data.token); // store JWT
+  
+      // Save token & role to localStorage
+      localStorage.setItem('token', data.token); 
+      localStorage.setItem('role', data.user.role); 
       setRole(data.user.role);
       navigate('/main');
     } catch (err) {
@@ -35,6 +34,7 @@ const Login = ({ setRole }) => {
       alert('Error logging in. See console for details.');
     }
   };
+  
 
   return (
     <div className='login-container'>     

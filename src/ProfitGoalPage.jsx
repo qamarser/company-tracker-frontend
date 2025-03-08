@@ -1,127 +1,148 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import Modal from "./componenets/Modal"; // Import existing Modal component
+import "./styling-sheet/FinanceTable.css";
 
 const ProfitGoalPage = ({ role }) => {
-  const [goals, setGoals] = useState([]); // Ensure goals is always an array
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('');
-  const [date, setDate] = useState('');
+  const [goals, setGoals] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [date, setDate] = useState("");
+  const [editingGoalId, setEditingGoalId] = useState(null);
+  const [showModal, setShowModal] = useState(false); // 🔹 Show/hide modal
 
-  // Fetch all profit goals on component mount
+  const storedRole = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('https://finance-x1t2.onrender.com/api/profit_goals', {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setGoals(data);
-        } else {
-          console.error('Invalid API response format:', data);
-          setGoals([]);
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching profit goals:', err);
-        setGoals([]);
-      });
+    fetchGoals();
   }, []);
 
-  // Handle adding a new profit goal
-  const handleAddGoal = async (e) => {
+  const fetchGoals = async () => {
+    try {
+      const response = await fetch("http://localhost:5001/profit_goals", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        console.error("❌ API Error:", response.status);
+        return;
+      }
+
+      const data = await response.json();
+      setGoals(data);
+    } catch (err) {
+      console.error("❌ Network Error Fetching Profit Goals:", err);
+    }
+  };
+
+  const handleSaveGoal = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const url = editingGoalId
+      ? `http://localhost:5001/profit_goals/${editingGoalId}`
+      : "http://localhost:5001/profit_goals";
+
+    const method = editingGoalId ? "PUT" : "POST";
 
     try {
-      const response = await fetch('https://finance-x1t2.onrender.com/api/profit_goals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ amount, currency, date }),
       });
 
       const data = await response.json();
-      if (response.ok && data.profit_goal) {
-        setGoals((prevGoals) => [...prevGoals, data.profit_goal]);
-        setAmount('');
-        setCurrency('');
-        setDate('');
+
+      if (response.ok) {
+        setGoals(prev =>
+          editingGoalId ? prev.map(goal => (goal.profit_goal_id === editingGoalId ? data.profit_goal : goal)) : [...prev, data.profit_goal]
+        );
+        closeForm();
       } else {
-        alert(`Error adding profit goal: ${data.error}`);
+        alert(`❌ Error: ${data.error}`);
       }
     } catch (err) {
-      console.error('Error adding profit goal:', err);
-      alert('Error adding profit goal. Check console for details.');
+      console.error("❌ Network Error:", err);
     }
   };
 
-  // Handle deleting a profit goal
-  const handleDeleteGoal = async (id) => {
-    const token = localStorage.getItem('token');
+  const handleEditClick = (goal) => {
+    setEditingGoalId(goal.profit_goal_id);
+    setAmount(goal.amount);
+    setCurrency(goal.currency);
+    setDate(goal.date);
+    setShowModal(true); // Show modal for editing
+  };
 
+  const handleDeleteGoal = async (id) => {
     try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/api/profit_goals/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`http://localhost:5001/profit_goals/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
-        setGoals((prevGoals) => prevGoals.filter((goal) => goal.profit_goal_id !== id));
+        setGoals(prev => prev.filter(goal => goal.profit_goal_id !== id));
       } else {
-        alert('Error deleting profit goal');
+        alert("❌ Error deleting profit goal");
       }
     } catch (err) {
-      console.error('Error deleting profit goal:', err);
+      console.error("❌ Network Error Deleting Profit Goal:", err);
     }
   };
 
+  const openForm = () => setShowModal(true);
+  const closeForm = () => {
+    setShowModal(false);
+    setEditingGoalId(null);
+    setAmount("");
+    setCurrency("");
+    setDate("");
+  };
+
   return (
-    <div>
-      <h2>Profit Goals</h2>
-      <table border="1" cellPadding="4">
+    <div className="table-container">
+      <div className="container-title">
+        <h2>Profit Goals</h2>
+        {storedRole === "subadmin" && <button className="add-btn" onClick={openForm}> Add</button>}
+      </div>
+
+      <table>
         <thead>
           <tr>
             <th>Amount</th>
             <th>Currency</th>
             <th>Date</th>
-            {role === 'subadmin' && <th>Actions</th>}
+            {storedRole === "subadmin" && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
-          {goals && Array.isArray(goals) && goals.length > 0 ? (
-            goals.map((goal) =>
-              goal ? (
-                <tr key={goal.profit_goal_id}>
-                  <td>{goal.amount || 'N/A'}</td>
-                  <td>{goal.currency || 'N/A'}</td>
-                  <td>{goal.date || 'N/A'}</td>
-                  {role === 'subadmin' && (
-                    <td>
-                      <button onClick={() => handleDeleteGoal(goal.profit_goal_id)}>Delete</button>
-                    </td>
-                  )}
-                </tr>
-              ) : null
-            )
-          ) : (
-            <tr>
-              <td colSpan="4">No profit goals found.</td>
+          {goals.map(goal => (
+            <tr key={goal.profit_goal_id}>
+              <td>{goal.amount}</td>
+              <td>{goal.currency}</td>
+              <td>{goal.date}</td>
+              {storedRole === "subadmin" && (
+                <td className="btn-Edit-Delete">
+                  <button className="ebtn" onClick={() => handleEditClick(goal)}>✏️ Edit</button>
+                  <button className="dbtn" onClick={() => handleDeleteGoal(goal.profit_goal_id)}>🗑 Delete</button>
+                </td>
+              )}
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
 
-      {role === 'subadmin' && (
-        <>
-          <h3>Add Profit Goal</h3>
-          <form onSubmit={handleAddGoal}>
-            <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
-            <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
-            <input type="date" placeholder="Date" value={date} onChange={(e) => setDate(e.target.value)} required />
-
-            <button type="submit">Add</button>
-          </form>
-        </>
-      )}
+      {/* 🔹 Modal Popup for Adding/Editing Profit Goal */}
+      <Modal isOpen={showModal} onClose={closeForm}>
+        <h3>{editingGoalId ? "Edit Profit Goal" : "Add Profit Goal"}</h3>
+        <form onSubmit={handleSaveGoal}>
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required />
+          <input type="date" placeholder="Date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          <button type="submit" className="sbtn">{editingGoalId ? "Update" : "Add"}</button>
+          <button type="button" className="sbtn cancel-btn" onClick={closeForm}>Cancel</button>
+        </form>
+      </Modal>
     </div>
   );
 };
