@@ -1,89 +1,66 @@
-// MainPage.jsx
-import React , { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import IncomesPage from './dashboard/IncomesPage.jsx';
-import ExpensesPage from './dashboard/ExpensesPage.jsx';
-import RecurringExpensesPage from './dashboard/RecurringExpensesPage.jsx';
-import RecurringIncomesPage from './dashboard/RecurringIncomesPage.jsx';
-import ProfitGoalPage from './ProfitGoalPage.jsx';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import IncomesPage from "./dashboard/IncomesPage.jsx";
+import ExpensesPage from "./dashboard/ExpensesPage.jsx";
+import RecurringExpensesPage from "./dashboard/RecurringExpensesPage.jsx";
+import RecurringIncomesPage from "./dashboard/RecurringIncomesPage.jsx";
+import  "./App.css";
 
-const MainPage = ({ role }) => {
+
+const MainPage = () => {
   const navigate = useNavigate();
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
+  const [activeTab, setActiveTab] = useState("income");
 
-  const goToAdminPage = () => {
-    navigate('/admin');
-  };
-
-  const [activeTab, setActiveTab] = useState("income"); // Default tab is 'Income'
-
-  const renderTable = () => {
-    switch (activeTab) {
-      case "income":
-        return <IncomesPage />;
-      case "expense":
-        return <ExpensesPage />;
-      case "recurringIncome":
-        return <RecurringIncomesPage />;
-      case "recurringExpense":
-        return <RecurringExpensesPage />;
-      default:
-        return <IncomeTable />;
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    if (storedRole && role !== storedRole) {
+      setRole(storedRole);
     }
+  }, [role]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    setRole(""); // Reset role before navigating
+    navigate("/"); // Redirect to login
   };
+
+  const goToAdminPage = () => {navigate("/admin");window.location.reload();}
+
+  const tabComponents = {
+    income: <IncomesPage role={role} />,
+    expense: <ExpensesPage role={role} />,
+    recurringIncome: <RecurringIncomesPage role={role} />,
+    recurringExpense: <RecurringExpensesPage role={role} />,
+  };
+
   return (
     <div>
-      <h2>Welcome to the Main Screen</h2>
-      {role === 'subadmin' && (
-        <button onClick={goToAdminPage}>ADD</button>
-      )}
+      <h2></h2>
+      {/* <button onClick={handleLogout} className="logout-btn">
+        Logout
+      </button> */}
+      
+      <div className="finance-container ">
+        <div className="same-line"><div className="menu-bar-header">
+          {Object.keys(tabComponents).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={activeTab === tab ? "active" : ""}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1).replace("Income", " Income").replace("Expense", " Expense")}
+            </button>
+          ))}
+        </div>
+        {role === "subadmin" && <button className= "add-admin-btn" onClick={goToAdminPage}>ADD Admin</button>}</div>
 
-<div className="finance-container">
-      {/* Navigation Menu */}
-      <div className="menu-bar">
-        <button onClick={() => setActiveTab("income")} className={activeTab === "income" ? "active" : ""}>
-          Income
-        </button>
-        <button onClick={() => setActiveTab("expense")} className={activeTab === "expense" ? "active" : ""}>
-          Expense
-        </button>
-        <button onClick={() => setActiveTab("recurringIncome")} className={activeTab === "recurringIncome" ? "active" : ""}>
-          Recurring Income
-        </button>
-        <button onClick={() => setActiveTab("recurringExpense")} className={activeTab === "recurringExpense" ? "active" : ""}>
-          Recurring Expense
-        </button>
+        <div className="table-container">{tabComponents[activeTab]}</div>
       </div>
 
-      {/* Dynamic Table Rendering */}
-      <div className="table-container">{renderTable()}</div>
-    </div>
-
-
-      {/* <section style={{ marginTop: '2rem' }}>
-        <h3>Incomes Section</h3>
-        <IncomesPage role={role} />
-      </section>
-      {/* Expenses Section */}
-     
-
-      {/* Recurring Incomes Section */}
-      {/* <section style={{ marginTop: '2rem' }}>
-        <h3>Recurring Incomes</h3>
-        <RecurringIncomesPage role={role} />
-      </section> */}
-
-      {/* Recurring Expenses Section */}
-      {/* <section style={{ marginTop: '2rem' }}>
-        <h3>Recurring Expenses</h3>
-        <RecurringExpensesPage role={role} />
-      </section>  */}
-      <section style={{ marginTop: '2rem' }}>
-        <h3>Profit Goals</h3>
-        <ProfitGoalPage role={role} />
-      </section>should be like 
-    </div>
       
-   
+    </div>
   );
 };
 
