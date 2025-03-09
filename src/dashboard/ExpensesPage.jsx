@@ -1,140 +1,108 @@
-import React, { useEffect, useState } from 'react';
-import '../styling-sheet/FinanceTable.css';
+import React, { useEffect, useState } from "react";
+import Modal from "../componenets/Modal";
+import "../styling-sheet/FinanceTable.css";
 
 const ExpensesPage = ({ role }) => {
   const [expenses, setExpenses] = useState([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("");
   const [editingExpenseId, setEditingExpenseId] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('https://finance-x1t2.onrender.com/api/expenses', {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(data => setExpenses(data))
-      .catch(err => console.error('Error fetching expenses:', err));
+    fetchExpenses();
   }, []);
 
-  const canEditDelete = role === 'admin' || role === 'subadmin';
+  const fetchExpenses = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:5001/expenses", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (response.ok) setExpenses(data);
+    } catch (err) {
+      console.error("Error fetching expenses:", err);
+    }
+  };
 
-  // ✅ Add handleEditClick Function
+  const canEditDelete = role === "admin" || role === "subadmin";
+
+  const openForm = () => setShowModal(true);
+  const closeForm = () => {
+    setShowModal(false);
+    setEditingExpenseId(null);
+    setTitle("");
+    setDescription("");
+    setAmount("");
+    setCurrency("");
+  };
+
+  const handleAddOrUpdateExpense = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    const url = editingExpenseId ? `http://localhost:5001/expenses/${editingExpenseId}` : "http://localhost:5001/expenses";
+    const method = editingExpenseId ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title, description, amount, currency:"$" }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setExpenses(prev =>
+          editingExpenseId ? prev.map(exp => (exp.id === editingExpenseId ? result.expense : exp)) : [...prev, result.expense]
+        );
+        closeForm();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (err) {
+      alert("Error adding/updating expense.");
+    }
+  };
+
   const handleEditClick = (expense) => {
     setEditingExpenseId(expense.id);
     setTitle(expense.title);
-    setDescription(expense.description || '');
+    setDescription(expense.description || "");
     setAmount(expense.amount);
     setCurrency(expense.currency);
-    setShowForm(true); 
+    setShowModal(true);
   };
 
-  const handleAddClick = () => {
-    setEditingExpenseId(null);
-    setTitle('');
-    setDescription('');
-    setAmount('');
-    setCurrency('');
-    setShowForm(true); 
-  };
-
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingExpenseId(null);
-    setTitle('');
-    setDescription('');
-    setAmount('');
-    setCurrency('');
-  }
-
-  // ✅ Add Expense
-  const handleAddExpense = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    
-    try {
-      const response = await fetch('https://finance-x1t2.onrender.com/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ title, description, amount, currency }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setExpenses([...expenses, data.expense]);
-        setTitle('');
-        setDescription('');
-        setAmount('');
-        setCurrency('');
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (err) {
-      console.error('Error adding expense:', err);
-      alert('Error adding expense. Check console for details.');
-    }
-  };
-
-  // ✅ Delete Expense
   const handleDeleteExpense = async (id) => {
-    const token = localStorage.getItem('token');
-
+    if (!id) return;
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/api/expenses/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`http://localhost:5001/expenses/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await response.json();
       if (response.ok) {
-        alert('Expense deleted successfully!');
-        setExpenses(expenses.filter((exp) => exp.id !== id));
+        setExpenses(prev => prev.filter(exp => exp.id !== id));
       } else {
-        alert(`Failed to delete expense. Error: ${data.error}`);
+        alert("Failed to delete expense.");
       }
     } catch (err) {
-      console.error('Error deleting expense:', err);
-      alert('Error deleting expense. Check console for details.');
-    }
-  };
-
-  // ✅ Update Expense
-  const handleUpdateExpense = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/api/expenses/${editingExpenseId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ title, description, amount, currency }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert('Expense updated successfully!');
-        setExpenses(expenses.map(exp => (exp.id === editingExpenseId ? data.expense : exp)));
-        setEditingExpenseId(null);
-        setTitle('');
-        setDescription('');
-        setAmount('');
-        setCurrency('');
-      } else {
-        alert(`Failed to update expense. Error: ${data.error}`);
-      }
-    } catch (err) {
-      console.error('Error updating expense:', err);
-      alert('Error updating expense. Check console for details.');
+      console.error("Error deleting expense:", err);
     }
   };
 
   return (
-    <div className="container">
-      <h2>Expenses</h2>
-      <table border="1" cellPadding="4" className="finance-table">
+    <div className="table-container">
+      <div className="container-title">
+        <h2>Expenses</h2>
+        {canEditDelete && <button className="add-btn" onClick={openForm}>ADD</button>}
+      </div>
+
+      <table>
         <thead>
           <tr>
             <th>Title</th>
@@ -145,17 +113,17 @@ const ExpensesPage = ({ role }) => {
           </tr>
         </thead>
         <tbody>
-          {expenses.map(exp => (
-            <tr key={exp.id}>
-              <td>{exp.title}</td>
-              <td>{exp.description}</td>
-              <td>{exp.amount}</td>
-              <td>{exp.currency}</td>
-              <td>
+          {expenses.map(expense => (
+            <tr key={expense.id}>
+              <td>{expense.title}</td>
+              <td>{expense.description}</td>
+              <td>{expense.amount}</td>
+              <td>$</td>
+              <td className="btn-Edit-Delete">
                 {canEditDelete && (
                   <>
-                    <button className="ebtn" onClick={() => handleEditClick(exp)}>Edit</button>
-                    <button className="ebtn" onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
+                    <button className="ebtn" onClick={() => handleEditClick(expense)}>✏️ Edit</button>
+                    <button className="dbtn" onClick={() => handleDeleteExpense(expense.id)}>🗑 Delete</button>
                   </>
                 )}
               </td>
@@ -164,19 +132,18 @@ const ExpensesPage = ({ role }) => {
         </tbody>
       </table>
 
-      {showForm && (
-        <form onSubmit={editingExpenseId ? handleUpdateExpense : handleAddExpense} className="form-container">
-          <h3>{editingExpenseId ? 'Edit Expense' : 'Add Expense'}</h3> 
-          <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required /> 
-          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} /> 
-          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required /> 
-          <input type="text" placeholder="Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} required /> 
-          <button type="submit" className="sbtn">
-            {editingExpenseId ? 'Update' : 'Add'}
-          </button>
-          <button type="button" className="sbtn" onClick={handleFormClose}>Cancel</button>
+      {/* 🔹 Modal Popup for Adding/Editing Expense */}
+      <Modal isOpen={showModal} onClose={closeForm}>
+        <h3>{editingExpenseId ? "Edit Expense" : "Add Expense"}</h3>
+        <form onSubmit={handleAddOrUpdateExpense}>
+          <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input type="text" placeholder="Currency" value="$" onChange={(e) => setCurrency(e.target.value)} required />
+          <button type="submit" className="sbtn">{editingExpenseId ? "Update" : "Add"}</button>
+          <button type="button" className="sbtn cancel-btn" onClick={closeForm}>Cancel</button>
         </form>
-      )}
+      </Modal>
     </div>
   );
 };
