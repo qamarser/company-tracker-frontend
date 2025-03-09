@@ -109,6 +109,7 @@ body {
     justify-content: space-between; /* Push items apart */
     width: 100%; /* Adjust width */
     margin: auto; /* Center horizontally */
+    gap: 10px;
 }
 .menu-bar-header {
     display: flex;
@@ -118,7 +119,7 @@ body {
     border-radius: var(--border-radius);
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow effect */
     width:42vw;
-    height: 50px;
+    height: 74px;
 }
 
 /* 🔹 Individual Menu Buttons */
@@ -128,8 +129,10 @@ body {
     font-size: 16px;
     font-weight: 400;
     color: white;
-    padding: 0px 20px;
-    margin: 0 10px;
+    /* padding: 0px 20px; */
+    padding: 10px 15px;
+    /* margin: 0 10px; */
+    margin: 5px; 
     cursor: pointer;
     transition: 0.3s ease-in-out;
     position: relative;
@@ -177,7 +180,7 @@ body {
     cursor: pointer;
     transition: 0.3s ease;
     width: auto;
-    height: 40px;
+    height: 57px;
 }
 
 .add-admin-btn:hover {
@@ -217,12 +220,15 @@ body {
     .menu-bar-header {
         flex-wrap: wrap; /* Allow wrapping on smaller screens */
         justify-content: center;
-        width: 100%; 
+        width: 90%; 
+        height: auto;
+        padding: 10px;
     }
 
     .menu-bar-header button {
         font-size: 14px;
         padding: 10px 15px;
+        width: auto;
     }
 }
 
@@ -245,11 +251,12 @@ body {
     .menu-bar-header {
         flex-wrap: wrap; /* Allow wrapping on smaller screens */
         justify-content: center;
-        width: 100%; 
+        width: 80%; 
+        padding: 10px;
     }
 
     .menu-bar-header button {
-        font-size: 16px;
-        padding: 10px 20px;
+        font-size: 15px;
+        padding: 10px 18px;
     }
 }
