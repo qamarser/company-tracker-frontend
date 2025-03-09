@@ -1,166 +1,108 @@
-// IncomesPage.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import Modal from "../componenets/Modal"; // Import Modal component
+import "../styling-sheet/FinanceTable.css";
 
 const IncomesPage = ({ role }) => {
   const [incomes, setIncomes] = useState([]);
-
-  // For add/edit
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("");
   const [editingIncomeId, setEditingIncomeId] = useState(null);
-  const [loggedInAdminId, setLoggedInAdminId] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false); // 🔹 Show/hide modal
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user')); 
-    if (user) {
-      setLoggedInAdminId(user.admin_id);
-    }
-  
-    fetch('https://finance-x1t2.onrender.com/incomes', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Fetched incomes:', data);
-        if (Array.isArray(data)) {
-          setIncomes(data);
-        } else {
-          console.error('Incomes fetch error:', data);
-        }
-      })
-      .catch((err) => console.error('Error fetching incomes:', err));
+    fetchIncomes();
   }, []);
 
-  const canAdd = (role === 'admin' || role === 'subadmin');
-
-  // -------------- ADD --------------
-  const handleAddIncome = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
+  const fetchIncomes = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch('https://finance-x1t2.onrender.com/incomes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ title, description, amount, currency }),
+      const response = await fetch("http://localhost:5001/incomes", {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      console.log('We are in Add Income');
-
-      if (response.ok) {
-        alert('Income created successfully!');
-        setIncomes((prev) => [...prev, data.income]);
-        setTitle('');
-        setDescription('');
-        setAmount('');
-        setCurrency('');
-        console.log('Creating income with admin_id:', req.user.admin_id);
-
-      } else {
-        alert(`Failed to create income. Error: ${data.error}`);
-        console.log('Creating income with admin_id:', req.user.admin_id);
-
-      }
+      if (response.ok) setIncomes(data);
     } catch (err) {
-      console.error('Error creating income:', err);
-      alert('Error creating income. Check console for details.');
-
+      console.error("Error fetching incomes:", err);
     }
   };
 
-  // -------------- EDIT --------------
+  const handleAddOrUpdateIncome = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    const url = editingIncomeId
+      ? `http://localhost:5001/incomes/${editingIncomeId}`
+      : "http://localhost:5001/incomes";
+    const method = editingIncomeId ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ title, description, amount, currency:"$" }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setIncomes(prev =>
+          editingIncomeId ? prev.map(inc => (inc.id === editingIncomeId ? result.income : inc)) : [...prev, result.income]
+        );
+        closeForm();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (err) {
+      alert("Error adding/updating income.");
+    }
+  };
+
   const handleEditClick = (income) => {
     setEditingIncomeId(income.id);
     setTitle(income.title);
-    setDescription(income.description || '');
+    setDescription(income.description || "");
     setAmount(income.amount);
     setCurrency(income.currency);
-    setShowForm(true); 
+    setShowModal(true); // Show modal
   };
 
-    // -------------- Cancel --------------
-    const handleFormClose = () => {
-      setShowForm(false);
-      setEditingIncomeId(null);
-      setTitle('');
-      setDescription('');
-      setAmount('');
-      setCurrency('');
-    };
-    
-  // -------------- UPDATE --------------
-  const handleUpdateIncome = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/incomes/${editingIncomeId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ title, description, amount, currency }),
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('Income updated successfully!');
-        setIncomes((prev) =>
-          prev.map((inc) => (inc.id === editingIncomeId ? data.income : inc))
-        );
-        setEditingIncomeId(null);
-        setTitle('');
-        setDescription('');
-        setAmount('');
-        setCurrency('');
-      } else {
-        alert(`Failed to update income. Error: ${data.error}`);
-      }
-    } catch (err) {
-      console.error('Error updating income:', err);
-      alert('Error updating income. Check console for details.');
-    }
-  };
-
-  // -------------- DELETE --------------
   const handleDeleteIncome = async (id) => {
-    const token = localStorage.getItem('token');
+    if (!id) return;
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`https://finance-x1t2.onrender.com/incomes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      const response = await fetch(`http://localhost:5001/incomes/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
 
       if (response.ok) {
-        alert('Income deleted successfully!');
-        setIncomes((prev) => prev.filter((inc) => inc.id !== id));
+        setIncomes(prev => prev.filter(inc => inc.id !== id));
       } else {
-        alert(`Failed to delete income. Error: ${data.error}`);
+        alert("Failed to delete income.");
       }
     } catch (err) {
-      console.error('Error deleting income:', err);
-      alert('Error deleting income. Check console for details.');
+      console.error("Error deleting income:", err);
     }
   };
 
+  const openForm = () => setShowModal(true);
+  const closeForm = () => {
+    setShowModal(false);
+    setEditingIncomeId(null);
+    setTitle("");
+    setDescription("");
+    setAmount("");
+    setCurrency("");
+  };
 
   return (
-    <div className="container">
-      <h2>Incomes</h2>
-      <table border="1" cellPadding="4">
+    <div className="table-container">
+      <div className="container-title">
+        <h2>Incomes</h2>
+        <button className="add-btn" onClick={openForm}>ADD</button>
+      </div>
+
+      <table>
         <thead>
           <tr>
             <th>Title</th>
@@ -171,85 +113,33 @@ const IncomesPage = ({ role }) => {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(incomes) && incomes.map((income) => {
-            // subadmin can do everything (edit/delete)
-            // admin might have partial, enforced by backend
-            const canEditDelete = role === 'admin' || role === 'subadmin';
-
-            const handleFormClose = () => {
-              setShowForm(false);
-              setEditingIncomeId(null);
-              setTitle('');
-              setDescription('');
-              setAmount('');
-              setCurrency('');
-            };
-            
-
-            return (
-              <tr key={income.id}>
-                <td>{income.title}</td>
-                <td>{income.description}</td>
-                <td>{income.amount}</td>
-                <td>{income.currency}</td>
-                <td>
-                  {canEditDelete && (
-                    <>
-                      <button className="ebtn" onClick={() => handleEditClick(income)}>Edit</button>
-                      <button className="ebtn" onClick={() => handleDeleteIncome(income.id)}>Delete</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+          {incomes.map(income => (
+            <tr key={income.id}>
+              <td>{income.title}</td>
+              <td>{income.description}</td>
+              <td>{income.amount}</td>
+              <td>$</td>
+              <td className="btn-Edit-Delete">
+                <button className="ebtn" onClick={() => handleEditClick(income)}>✏️ Edit</button>
+                <button className="dbtn" onClick={() => handleDeleteIncome(income.id)}>🗑 Delete</button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      {canAdd && (
-        <div style={{ marginTop: '2rem' }}>
-          {showForm && (
-          <form className="form-container" onSubmit={editingIncomeId ? handleUpdateIncome : handleAddIncome}>
-             <h3>{editingIncomeId ? 'Edit Income' : 'Add Income'}</h3>
-
-
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-
-          
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-           
-              <input
-                type="text"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                required
-              />
-              
-            <button type="submit" className="sbtn" >
-              {editingIncomeId ? 'Update' : 'Add'}
-            </button>
-            <button type="button" className="sbtn" onClick={handleFormClose}>
-                    Cancel </button>
-          </form>
-         )}
-        </div>
-      )}
+      {/* 🔹 Modal Popup for Adding/Editing Income */}
+      <Modal isOpen={showModal} onClose={closeForm}>
+        <h3>{editingIncomeId ? "Edit Income" : "Add Income"}</h3>
+        <form onSubmit={handleAddOrUpdateIncome}>
+          <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input type="text" placeholder="Currency" value="$" onChange={(e) => setCurrency(e.target.value)} disabled />
+          <button type="submit" className="sbtn">{editingIncomeId ? "Update" : "Add"}</button>
+          <button type="button" className="sbtn cancel-btn" onClick={closeForm}>Cancel</button>
+        </form>
+      </Modal>
     </div>
   );
 };
